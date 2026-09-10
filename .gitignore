@@ -1,0 +1,38 @@
+# --- Delphi Compilação e Binários ---
+*.dcu
+*.exe
+*.dll
+*.bpl
+*.dcp
+*.dres
+*.rsm
+*.map
+*.o
+*.obj
+*.~*
+
+# --- Gerenciador de Pacotes Boss ---
+modules/
+boss.lock
+
+
+# --- Arquivos de Configuração Local e Histórico ---
+*.identcache
+*.local
+*.dsk
+*.stat
+*.tvsconfig
+*.skincfg
+__recovery/
+History/
+
+# --- Arquivos Gerados pelo IDE (opcional, remova se quiser commitar configurações do projeto) ---
+# Se você deseja manter as configurações de build do projeto, comente as duas linhas abaixo:
+#*.dproj.local
+#*.cbproj.local
+
+# --- Outros arquivos temporários ---
+*.bak
+*.tmp
+Log/
+Logs/
