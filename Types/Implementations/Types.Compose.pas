@@ -5,9 +5,15 @@ interface
 uses
   Types.Default;
 
+
 type
+  {Tipo Composto de Dados}
   RIntervaloCodigo = record
   private
+    {É esperado que as validações de dados já teham
+    sido realizadas antecipadamente nos tipos simples
+    de dados: Aqueles que são implementados com interfaces.
+    O Tipo composto de dados apenas dá visibilidade para elas}
     FIntervalo: RIntervalo;
     FCodigo: RCodigo;
 
@@ -19,6 +25,9 @@ type
     procedure setDataInicial(const Value: TDateTime);
   public
 
+    {properties são redefinidas aprenas para deixar
+    mais intuitivo o acesso dos dados, mas não são
+    obrigatórias}
     property DataInicial: TDateTime read getDataInicial write setDataInicial;
     property DataFinal: TDateTime read getDataFinal write setDataFinal;
     property Codigo: Integer read getCodigo write setCodigo;
