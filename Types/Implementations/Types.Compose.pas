@@ -10,7 +10,7 @@ type
   {Tipo Composto de Dados}
   RIntervaloCodigo = record
   private
-    {É esperado que as validações de dados já teham
+    {É esperado que as validações de dados já tenham
     sido realizadas antecipadamente nos tipos simples
     de dados: Aqueles que são implementados com interfaces.
     O Tipo composto de dados apenas dá visibilidade para elas}
@@ -25,7 +25,7 @@ type
     procedure setDataInicial(const Value: TDateTime);
   public
 
-    {properties são redefinidas aprenas para deixar
+    {properties são redefinidas apenas para deixar
     mais intuitivo o acesso dos dados, mas não são
     obrigatórias}
     property DataInicial: TDateTime read getDataInicial write setDataInicial;
