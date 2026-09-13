@@ -22,10 +22,14 @@ uses
 procedure UseProc();
 var
   lIntervaloCodigo: RIntervaloCodigo;
+  lIntervaloCodigo2: RIntervaloCodigo;
 begin
   lIntervaloCodigo := RIntervaloCodigo
+  ('{"dataInicial": "11/10/2024", "dataFinal": "12/30/2024", "Codigo": 111}');
+  lIntervaloCodigo2 :=  RIntervaloCodigo
   ('{"dataInicial": "12/12/2024", "dataFinal": "12/12/2024", "Codigo": 123}');
   Writeln(lIntervaloCodigo.ToString);
+  Writeln(lIntervaloCodigo2.ToString);
 end;
 
 begin

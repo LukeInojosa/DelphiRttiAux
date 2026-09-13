@@ -4,11 +4,16 @@ interface uses
   Interfaces.Generic,
   System.Generics.Collections, System.Rtti;
 
+
 type
   TGeneric = class(TInterfacedObject, IGeneric)
   strict private
     FPropIsFilled: TDictionary<String,Boolean>;
     function getPropIsFilled: TDictionary<String,Boolean>;
+
+    procedure VmiProcedure(Instance: TObject; Method: TRttiMethod;
+      const Args: TArray<TValue>; out DoInvoke: Boolean;  out Response: TValue);
+
   protected
     function SetValues(PropNames: String; Values: TArray<String>): Boolean; overload;
     function SetValues(PropNames: TArray<String>; Values: TArray<String>): Boolean; overload;
@@ -31,6 +36,8 @@ type
 
 implementation uses
   System.SysUtils, System.JSON, System.RegularExpressions, Helper.TObject, Utils.TClass;
+
+var GVirtualsMethodsInterceptors: TDictionary<TClass, TVirtualMethodInterceptor>;
 
 { TGeneric }
 function TGeneric.SetValues(PropNames, Values: TArray<String>): Boolean;
@@ -59,43 +66,13 @@ begin
   for propName in Self.getPropNames do
     Self.FPropIsFilled.AddOrSetValue(propName.ToLower, False);
 
-  vmi := TVirtualMethodInterceptor.Create(Self.ClassType);
-  vmi.OnBefore :=
-  procedure (
-    Instance: TObject;
-    Method: TRttiMethod;
-    const Args: TArray<TValue>;
-    out DoInvoke: Boolean;
-    out Response: TValue)
-  var
-    lValue: TValue;
-    lTypeOfAcessorMethod: String;
-    lFieldName: String;
+  if not GVirtualsMethodsInterceptors.TryGetValue(Self.ClassType, vmi) then
   begin
-    DoInvoke := False;
-
-    if Method.Name.ToLower = 'afterconstruction' then
-      Writeln(Format('Executando Construtor da Classe <%s>',[Instance.ClassName]));
-
-    if Method.Name.ToLower = 'beforedestruction' then
-      Writeln(Format('Executando Destrutor da Classe <%s>',[Instance.ClassName]));
-
-    // pega tipo do metodo
-    lTypeOfAcessorMethod := Method.Name.Substring(0,3);
-
-    // pega campo que se esta modificando
-    lFieldName := Method.Name.Substring(3,Length(Method.Name) - 3);
-
-    if (lTypeOfAcessorMethod.ToLower = 'get') then
-    begin
-      Response := Self.getFieldValue('F' + lFieldName);
-    end
-    else if (lTypeOfAcessorMethod.ToLower = 'set') then
-    begin
-      Self.setFieldValue('F' + lFieldName, Args[0]);
-      Self.FPropIsFilled[lFieldName.ToLower] := True;
-    end;
+    vmi := TVirtualMethodInterceptor.Create(Self.ClassType);
+    vmi.OnBefore := Self.VmiProcedure;
+    GVirtualsMethodsInterceptors.Add(Self.ClassType, vmi);
   end;
+
   vmi.Proxify(Self);
 end;
 
@@ -233,4 +210,45 @@ begin
     Self.FPropIsFilled[Key] := False;
 end;
 
+procedure TGeneric.VmiProcedure(Instance: TObject; Method: TRttiMethod;
+  const Args: TArray<TValue>; out DoInvoke: Boolean; out Response: TValue);
+var
+  lValue: TValue;
+  lTypeOfAcessorMethod: String;
+  lFieldName: String;
+var
+  Target: TGeneric;
+begin
+  DoInvoke := False;
+  Target := TGeneric(Instance);
+
+  if Method.Name.ToLower = 'afterconstruction' then
+    Writeln(Format('Executando Construtor da Classe <%s>',[Target.ClassName]));
+
+  if Method.Name.ToLower = 'beforedestruction' then
+    Writeln(Format('Executando Destrutor da Classe <%s>',[Target.ClassName]));
+
+  // pega tipo do metodo
+  lTypeOfAcessorMethod := Method.Name.Substring(0,3);
+
+  // pega campo que se esta modificando
+  lFieldName := Method.Name.Substring(3,Length(Method.Name) - 3);
+
+  // se for um getter ou
+  if (lTypeOfAcessorMethod.ToLower = 'get') then
+  begin
+    Response := Target.getFieldValue('F' + lFieldName);
+  end
+  else if (lTypeOfAcessorMethod.ToLower = 'set') then
+  begin
+    Target.setFieldValue('F' + lFieldName, Args[0]);
+    Target.FPropIsFilled[lFieldName.ToLower] := True;
+  end;
+end;
+
+initialization
+  GVirtualsMethodsInterceptors :=
+  TDictionary<TClass, TVirtualMethodInterceptor>.Create();
+finalization
+  GVirtualsMethodsInterceptors.Free;
 end.

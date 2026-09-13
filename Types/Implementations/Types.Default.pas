@@ -55,6 +55,7 @@ class operator RDescricao.Explicit(AString: String): RDescricao;
 begin
   Result.Data := TDescricao.Create;
   Result.Data.SetValues(AString);
+  Result.Data._Release;
 end;
 
 function RDescricao.isFilled(const APropName: String): Boolean;

@@ -11,12 +11,13 @@ type
      procedure setRttiProperty(Prop: TRttiProperty; propValue: TValue);
      procedure SetPropValue(propName: String; propValue: TValue); overload;
      function getPropValue(propName: String): TValue;
+     function getPropNames(): TArray<String>;
 
      {Fields}
+     function hasField(fieldName: String): Boolean;
      procedure setFieldValue(fieldName: String; fieldValue: TValue);
      function getFieldValue(fieldName: String): TValue;
 
-     function getPropNames(): TArray<String>;
      function call(methodName: String; const args: array of TValue): TValue;
 
      // implementar profundidade da busca no futuro
@@ -166,6 +167,27 @@ begin
   end;
 end;
 
+
+function HelperTOBJ.hasField(fieldName: String): Boolean;
+var
+  Ctx: TRttiContext;
+  RttiType: TRttiType;
+  RttiField: TRttiField;
+begin
+  try
+    Ctx := TRttiContext.Create;
+    RttiType := Ctx.GetType(Self.ClassType);
+
+    if not Assigned(RttiType) then
+      raise Exception.Create('Nao foi possivel conseguir achar o tipo no contexto');
+
+    RttiField := RttiType.GetField(fieldName);
+
+    Result := Assigned(RttiField);
+  finally
+    Ctx.Free;
+  end;
+end;
 
 function HelperTOBJ.hasProp(propName: String): Boolean;
 var

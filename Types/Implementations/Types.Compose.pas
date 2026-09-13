@@ -58,7 +58,7 @@ end;
 
 function RIntervaloCodigo.getDataInicial: TDateTime;
 begin
-  Result := Self.FIntervalo.Data.dataFinal;
+  Result := Self.FIntervalo.Data.dataInicial;
 end;
 
 procedure RIntervaloCodigo.setCodigo(const Value: Integer);
@@ -73,7 +73,7 @@ end;
 
 procedure RIntervaloCodigo.setDataInicial(const Value: TDateTime);
 begin
-  Self.FIntervalo.Data.dataFinal := Value;
+  Self.FIntervalo.Data.dataInicial := Value;
 end;
 
 function RIntervaloCodigo.ToString: String;

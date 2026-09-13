@@ -28,7 +28,7 @@ var
   InnerProperty: TRttiProperty;
 begin
   Result := Nil;
-
+try
   ctx := TRttiContext.Create;
 
   RttiType := ctx.GetType(TypeInfo(T));
@@ -47,6 +47,9 @@ begin
 
     exit;
   end;
+finally
+  ctx.Free;
+end;
 end;
 
 class procedure TRecordUtil<T>.setInnerPropValue(ARec:T; propName: String;
@@ -59,6 +62,7 @@ var
   InnerProperty: TRttiProperty;
   P: TRttiProperty;
 begin
+try
   ctx := TRttiContext.Create;
 
   RttiType := ctx.GetType(TypeInfo(T));
@@ -83,8 +87,11 @@ begin
 
     exit;
   end;
-
   raise Exception.Create('Nao foi possivel conseguir achar o tipo no contexto');
+
+finally
+  ctx.Free;
+end;
 end;
 
 end.
