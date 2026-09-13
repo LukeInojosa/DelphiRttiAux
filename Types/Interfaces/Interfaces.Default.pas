@@ -1,6 +1,7 @@
 unit Interfaces.Default;
 
 interface uses
+  Annotations.Generic,
   Interfaces.Generic,
   Types.Generic;
 
@@ -29,7 +30,6 @@ type
     {Descricao}
     function getDescricao: String;
     procedure setDescricao(ADescricao: String);
-
     property descricao: String read getDescricao write setDescricao;
   end;
 
@@ -39,10 +39,7 @@ type
   public
     function getCodigo: Integer; virtual;
     procedure setCodigo(ACodigo: Integer); virtual;
-
     property codigo: Integer read getCodigo write setCodigo;
-
-    constructor Create;
   end;
 
   TIntervalo = class(TGeneric, IIntervalo)
@@ -58,8 +55,6 @@ type
 
     property dataInicial: TDateTime read getDataInicial write setDataInicial;
     property dataFinal: TDateTime read getDataFinal write setDataFinal;
-
-    constructor Create;
   end;
 
   TDescricao = class(TGeneric, IDescricao)
@@ -70,18 +65,11 @@ type
     procedure setDescricao(ADescricao: String); virtual;
 
     property descricao: String read getDescricao write setDescricao;
-
-    constructor Create;
   end;
 
 implementation
 
 { TDescricao }
-
-constructor TDescricao.Create;
-begin
-inherited;
-end;
 
 function TDescricao.getDescricao: String;
 begin
@@ -94,11 +82,6 @@ begin
 end;
 
 { TIntervalo }
-
-constructor TIntervalo.Create;
-begin
-inherited;
-end;
 
 function TIntervalo.getDataFinal: TDateTime;
 begin
@@ -121,11 +104,6 @@ begin
 end;
 
 { TCodigo }
-
-constructor TCodigo.Create;
-begin
-inherited;
-end;
 
 function TCodigo.getCodigo: Integer;
 begin

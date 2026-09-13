@@ -1,14 +1,19 @@
 unit Types.Generic;
 
 interface uses
+  Annotations.Generic,
   Interfaces.Generic,
-  System.Generics.Collections, System.Rtti;
+  System.Generics.Collections,
+  System.Rtti;
 
 
 type
   TGeneric = class(TInterfacedObject, IGeneric)
   strict private
-    FPropIsFilled: TDictionary<String,Boolean>;
+    FPropIsFilled: TDictionary<String,Boolean>;// <nome da property, se foi setada ou não>
+    FSetterOf: TDictionary<String, String>; //<nome do setter, property do setter>
+    FGetterOf: TDictionary<String, String>; // <nome do getter, property do getter>
+
     function getPropIsFilled: TDictionary<String,Boolean>;
 
     procedure VmiProcedure(Instance: TObject; Method: TRttiMethod;
@@ -18,8 +23,6 @@ type
     function SetValues(PropNames: String; Values: TArray<String>): Boolean; overload;
     function SetValues(PropNames: TArray<String>; Values: TArray<String>): Boolean; overload;
     function SetValues(jsonString: String): Boolean; overload;
-    constructor Create;
-    destructor Destroy; override;
   public
     function Tryget(propName: String; out Value: TValue): Boolean;
     function TrySet(propName: String; Value: TValue): Boolean;
@@ -32,6 +35,9 @@ type
     function ToString: String;
     // controle se campos foram setados ou não
     property isFilled: TDictionary<String,Boolean> read getPropIsFilled;
+
+    constructor Create;
+    destructor Destroy; override;
   end;
 
 implementation uses
@@ -60,11 +66,23 @@ constructor TGeneric.Create;
 var
   vmi: TVirtualMethodInterceptor;
   propName: String;
+  Value: String;
 begin
-  Self.FPropIsFilled := TDictionary<String,Boolean>.Create;
+  inherited;
 
-  for propName in Self.getPropNames do
-    Self.FPropIsFilled.AddOrSetValue(propName.ToLower, False);
+  Self.FPropIsFilled := TDictionary<String,Boolean>.Create;
+  Self.FSetterOf := TDictionary<String,String>.Create;
+  Self.FGetterOf := TDictionary<String,String>.Create;
+
+  for propName in Self.getDeclaredPropNames do
+  begin
+    Self.FPropIsFilled
+      .AddOrSetValue(propName.ToLower, False);
+    Self.FSetterOf
+      .AddOrSetValue(Self.setterNameOf(propName).ToLower, propName.ToLower);
+    Self.FGetterOf
+      .AddOrSetValue(Self.getterNameOf(propName).ToLower, propName.ToLower);
+  end;
 
   if not GVirtualsMethodsInterceptors.TryGetValue(Self.ClassType, vmi) then
   begin
@@ -79,6 +97,9 @@ end;
 destructor TGeneric.Destroy;
 begin
   Self.FPropIsFilled.Free;
+  Self.FSetterOf.Free;
+  Self.FGetterOf.Free;
+  inherited;
 end;
 
 function TGeneric.getPropIsFilled: TDictionary<String, Boolean>;
@@ -216,6 +237,8 @@ var
   lValue: TValue;
   lTypeOfAcessorMethod: String;
   lFieldName: String;
+  lAttribute: TCustomAttribute;
+  lPropertyName: String;
 var
   Target: TGeneric;
 begin
@@ -224,23 +247,52 @@ begin
 
   if Method.Name.ToLower = 'afterconstruction' then
     Writeln(Format('Executando Construtor da Classe <%s>',[Target.ClassName]));
-
   if Method.Name.ToLower = 'beforedestruction' then
     Writeln(Format('Executando Destrutor da Classe <%s>',[Target.ClassName]));
 
+  for lAttribute in Method.GetAttributes do
+  begin
+    if lAttribute is Getter then
+    begin
+      // pega valor do Field que a função é getter
+       Response := Target.getFieldValue(Getter(lAttribute).FFieldName);
+       exit;
+    end
+    else if lAttribute is Setter then
+    begin
+      if Length(Args) = 0 then
+        raise Exception.Create('Setter deve ter 1 argumento');
+
+      // seta o valor do field que a função é setter
+      Target.setFieldValue(Setter(lAttribute).FFieldName, Args[0]);
+
+      if not
+      Target
+        .FSetterOf
+        .TryGetValue(Method.Name.ToLower, lPropertyName)
+      then
+        raise Exception.Create('Não há propriedade cujo setter é ' + Method.Name);
+
+      // marca como setado
+      Target.FPropIsFilled[lPropertyName] := True;
+
+      exit;
+    end;
+  end;
+
   // pega tipo do metodo
   lTypeOfAcessorMethod := Method.Name.Substring(0,3);
-
   // pega campo que se esta modificando
   lFieldName := Method.Name.Substring(3,Length(Method.Name) - 3);
 
-  // se for um getter ou
   if (lTypeOfAcessorMethod.ToLower = 'get') then
   begin
-    Response := Target.getFieldValue('F' + lFieldName);
+    Response := Target.getFieldValue('F'+lFieldName)
   end
   else if (lTypeOfAcessorMethod.ToLower = 'set') then
   begin
+    if Length(Args) = 0 then
+      raise Exception.Create('Setter deve ter 1 argumento');
     Target.setFieldValue('F' + lFieldName, Args[0]);
     Target.FPropIsFilled[lFieldName.ToLower] := True;
   end;

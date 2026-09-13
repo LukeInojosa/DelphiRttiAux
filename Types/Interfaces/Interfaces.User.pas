@@ -1,8 +1,7 @@
 unit Interfaces.User;
 interface uses
   Interfaces.Generic,
-  Types.Generic, System.Generics.Collections,
-  System.Sysutils;
+  Types.Generic;
 
 type
   IUser = interface(IGeneric)
@@ -38,70 +37,47 @@ type
     property salario: Double read GetSalario write SetSalario;
     property casado: Boolean read GetCasado write SetCasado;
   end;
+  // TClassName deve herdard de IClassName e de TGeneric
+  TUser = class(TGeneric, IUser)
+  // nome dos atributos deve ser F[AtributeName] para
+  // que a atribuição automática funcione
+  strict private
+    FNome: String;
+    FSenha: String;
+    FNascimento: TDateTime;
+    FSalario: Double;
+    FCasado: Boolean;
+    FLucas: String;
+  public
+    // getters e settes devem ser publcos em TClasse
+    // e todos devem ser virtual. Caso queria implementar
+    // seu próprio getter ou setter, não marque ele como
+    // virtual. Dessa forma, ele não será sobrescrito
+    // pelo constructor do TGeneric
+    procedure SetNome(Nome:string); virtual;
+    function GetNome: String; virtual;
 
-   // TClassName deve herdard de IClassName e de TGeneric
-   TUser = class(TGeneric, IUser)
-    // nome dos atributos deve ser F[AtributeName] para
-    // que a atribuição automática funcione
-    strict private
-      FNome: String;
-      FSenha: String;
-      FNascimento: TDateTime;
-      FSalario: Double;
-      FCasado: Boolean;
-    public
-      // getters e settes devem ser publcos em TClasse
-      // e todos devem ser virtual. Caso queria implementar
-      // seu próprio getter ou setter, não marque ele como
-      // virtual. Dessa forma, ele não será sobrescrito
-      // pelo constructor do TGeneric
-      procedure SetNome(Nome:string); virtual;
-      function GetNome: String; virtual;
+    procedure SetSenha(Senha: String); virtual;
+    function GetSenha: String; virtual;
 
-      procedure SetSenha(Senha: String); virtual;
-      function GetSenha: String; virtual;
+    procedure SetNascimento(Nascimento: TDateTime); virtual;
+    function GetNascimento: TDateTime; virtual;
 
-      procedure SetNascimento(Nascimento: TDateTime); virtual;
-      function GetNascimento: TDateTime; virtual;
+    procedure SetSalario(Salario: Double); virtual;
+    function GetSalario: Double; virtual;
 
-      procedure SetSalario(Salario: Double); virtual;
-      function GetSalario: Double; virtual;
+    procedure SetCasado(ACasado: Boolean); virtual;
+    function getCasado: Boolean; virtual;
 
-      procedure SetCasado(ACasado: Boolean); virtual;
-      function getCasado: Boolean; virtual;
-
-      property nome: String read GetNome write SetNome;
-      property senha: String read GetSenha write SetSenha;
-      property nascimento: TDateTime read GetNascimento write SetNascimento;
-      property salario: Double read GetSalario write SetSalario;
-      property casado: Boolean read GetCasado write SetCasado;
-
-      // Construtor deve existir
-      constructor Create;
-      destructor Destroy;
+    property nome: String read GetNome write SetNome;
+    property senha: String read GetSenha write SetSenha;
+    property nascimento: TDateTime read GetNascimento write SetNascimento;
+    property salario: Double read GetSalario write SetSalario;
+    property casado: Boolean read GetCasado write SetCasado;
   end;
 
 implementation
 { TUser }
-
-// Construtor deve chamar inherited
-// para que os getters e settes sejam
-// construidos automaticamente
-constructor TUser.Create;
-begin
-  inherited;
-end;
-
-
-// Não é necessário nenhuma implementação
-// dos getters e setters virtuals. Caso haja uma
-// implementação, ela será ignorada a menos que
-// a função ou procedimento não seja virtual
-destructor TUser.Destroy;
-begin
-  Writeln('Destructor Chamado para Usuario');
-  inherited;
-end;
 
 function TUser.getCasado: Boolean;
 begin
