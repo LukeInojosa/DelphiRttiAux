@@ -46,6 +46,7 @@ uses
 
 var
   Ctx: TRttiContext;
+  FormatSettings: TFormatSettings;
 { HelperTOBJ }
 
 
@@ -131,21 +132,23 @@ begin
   Result := Nil;
 
   ctx := TRttiContext.Create;
+  try
+    RttiType := ctx.GetType(Self.ClassType);
 
-  RttiType := ctx.GetType(Self.ClassType);
+    for Field in RttiType.GetFields do
+    begin
+      FieldType := Field.FieldType;
 
-  for Field in RttiType.GetFields do
-  begin
-    FieldType := Field.FieldType;
+      InnerProperty := FieldType.GetProperty(propName);
 
-    InnerProperty := FieldType.GetProperty(propName);
+      if not Assigned(InnerProperty) then
+         continue;
 
-    if not Assigned(InnerProperty) then
-       continue;
-
-    Result := innerProperty.GetValue(Field.GetValue(Self).AsObject);
-
-    exit;
+      Result := innerProperty.GetValue(Field.GetValue(Self).AsObject);
+      exit;
+    end;
+  finally
+    Ctx.Free;
   end;
 end;
 
@@ -342,27 +345,30 @@ var
   InnerProperty: TRttiProperty;
 begin
   ctx := TRttiContext.Create;
+  try
+    RttiType := ctx.GetType(Self.ClassType);
 
-  RttiType := ctx.GetType(Self.ClassType);
+    for Field in RttiType.GetFields do
+    begin
+      FieldType := Field.FieldType;
 
-  for Field in RttiType.GetFields do
-  begin
-    FieldType := Field.FieldType;
+      InnerProperty := FieldType.GetProperty(propName);
 
-    InnerProperty := FieldType.GetProperty(propName);
+      if not Assigned(InnerProperty) then
+         continue;
 
-    if not Assigned(InnerProperty) then
-       continue;
+      if not InnerProperty.IsWritable then
+        raise Exception.Create('propriedade <' + propName + '> nao eh writable');
 
-    if not InnerProperty.IsWritable then
-      raise Exception.Create('propriedade <' + propName + '> nao eh writable');
+      Field.GetValue(Self).AsObject.setRttiProperty(InnerProperty, propValue);
 
-    Field.GetValue(Self).AsObject.setRttiProperty(InnerProperty, propValue);
+      exit;
+    end;
 
-    exit;
+    raise Exception.Create('Nao foi possivel conseguir achar o tipo no contexto');
+  finally
+    Ctx.Free;
   end;
-
-  raise Exception.Create('Nao foi possivel conseguir achar o tipo no contexto');
 end;
 
 procedure HelperTOBJ.SetPropValue(propName: String; propValue: TValue);
@@ -419,11 +425,11 @@ begin
           ftDouble:
           begin
             if Prop.PropertyType.Handle = System.TypeInfo(TDate) then
-              Prop.SetValue(Self,StrToDate(propValueAsString))
+              Prop.SetValue(Self,StrToDate(propValueAsString, FormatSettings))
             else if Prop.PropertyType.Handle = System.TypeInfo(TTime) then
-              Prop.SetValue(Self,StrToTime(propValueAsString))
+              Prop.SetValue(Self,StrToTime(propValueAsString, FormatSettings))
             else if Prop.PropertyType.Handle = System.TypeInfo(TDateTime) then
-              Prop.SetValue(Self,StrToDateTime(propValueAsString))
+              Prop.SetValue(Self,StrToDateTime(propValueAsString, FormatSettings))
             else
               Prop.SetValue(Self,StrToFloat(propValueAsString))
           end;
@@ -487,4 +493,6 @@ begin
   end;
 end;
 
+initialization
+  FormatSettings := TFormatSettings.Create('pt-BR');
 end.

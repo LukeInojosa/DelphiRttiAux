@@ -17,7 +17,8 @@ uses
   Utils.TClass in 'Helpers\Utils.TClass.pas',
   Helper.TObject in 'Helpers\Helper.TObject.pas',
   Utils.Records in 'Helpers\Utils.Records.pas',
-  Types.Compose in 'Types\Implementations\Types.Compose.pas';
+  Types.Compose in 'Types\Implementations\Types.Compose.pas',
+  Annotations.Generic in 'Types\Annotations\Annotations.Generic.pas';
 
 procedure UseProc();
 var
@@ -28,6 +29,10 @@ begin
   ('{"dataInicial": "11/10/2024", "dataFinal": "12/30/2024", "Codigo": 111}');
   lIntervaloCodigo2 :=  RIntervaloCodigo
   ('{"dataInicial": "12/12/2024", "dataFinal": "12/12/2024", "Codigo": 123}');
+
+  lIntervaloCodigo.Codigo := 241242;
+  lIntervalodCodigo2.Codigo := 3123;
+
   Writeln(lIntervaloCodigo.ToString);
   Writeln(lIntervaloCodigo2.ToString);
 end;

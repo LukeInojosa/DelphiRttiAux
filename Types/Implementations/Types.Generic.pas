@@ -175,25 +175,28 @@ var
   propName: String;
   value: TValue;
   isFilledProp: Boolean;
+  Json: TJSONObject;
 begin
-  Result :='{';
-  propNames := Self.getPropNames();
-  for propName in propNames do
-  begin
-    if propName = 'isFilled' then
-      continue;
+  Result := '';
+  Json := TJSONObject.Create;
+  try
+    propNames := Self.getDeclaredPropNames;
+    for propName in propNames do
+    begin
+      if (
+        Self.isFilled.TryGetValue(propName, isFilledProp) and
+        (not isFilledProp) )
+      then
+        continue;
 
-    if (
-      Self.isFilled.TryGetValue(propName, isFilledProp) and
-      (not isFilledProp) )
-    then
-      continue;
+      value := Self.getPropValue(propName);
 
-    value := Self.getPropValue(propName);
-    Result := Result + Format('%s : %s ,', [propName, value.ToString])
+      Json.AddPair(propName, Value.ToString);
+    end;
+    Result := Json.ToString;
+  finally
+    Json.Free;
   end;
-  Delete(Result, Length(Result), 1);
-  Result := Result + '}';
 end;
 
 function TGeneric.Tryget(propName: String; out Value: TValue): Boolean;
