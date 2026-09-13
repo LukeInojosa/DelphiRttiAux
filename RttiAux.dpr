@@ -26,12 +26,12 @@ var
   lIntervaloCodigo2: RIntervaloCodigo;
 begin
   lIntervaloCodigo := RIntervaloCodigo
-  ('{"dataInicial": "11/10/2024", "dataFinal": "12/30/2024", "Codigo": 111}');
+  ('{"dataInicial": "11/10/2024", "dataFinal": "30/12/2024", "Codigo": 111}');
   lIntervaloCodigo2 :=  RIntervaloCodigo
   ('{"dataInicial": "12/12/2024", "dataFinal": "12/12/2024", "Codigo": 123}');
 
   lIntervaloCodigo.Codigo := 241242;
-  lIntervalodCodigo2.Codigo := 3123;
+  lIntervaloCodigo2.Codigo := 3123;
 
   Writeln(lIntervaloCodigo.ToString);
   Writeln(lIntervaloCodigo2.ToString);
